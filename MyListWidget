@@ -1,0 +1,47 @@
+class MyList(list):
+    def __init__(self, parent, startTop):
+        self.parentWindow = parent
+        self.listItems = []
+        self.lastTop = startTop
+        self.thisSelectedItem = None
+
+    def append(self, value):
+        self.lastTop += 42
+        # init Selction Labele
+        newSelLabel = QLabel(parent=self.parentWindow)
+        newSelLabel.setGeometry(3, self.lastTop, 509, 42)
+        newSelLabel.setStyleSheet("background-color: transparent;\nborder:none\n")
+        
+        # init item Label
+        newTitleLabel = QLabel(text=value, parent=self.parentWindow)
+        newTitleLabel.move(15, self.lastTop + 13)
+        newTitleLabel.setFont(QFont("나눔고딕", 12))
+        newTitleLabel.setStyleSheet("background-color: transparent;\nborder: none;\ncolor: black\n\n")
+        newSelLabel.mousePressEvent = lambda e: self.__itemSelection((newTitleLabel, newSelLabel))
+        self.listItems.append((newTitleLabel, newSelLabel))
+        super().append(value)
+
+    def removeToIndex(self, Index):
+        (Title, Select) = self.listItems[Index]
+        Title.deleteLater()
+        Select.deleteLater()
+        self.listItems.remove(self.listItems[Index])
+        self.remove(self[Index])
+
+
+    def __clearSelectLabel(self):
+        for (label, select) in self.listItems:
+            select.setStyleSheet("background-color: transparent;\nborder: none;\ncolor: black\n\n")
+
+    def __itemSelection(self, thisItem):
+        thisTitle, thisSelect = thisItem
+        self.thisSelectedItem = thisSelect
+        self.__clearSelectLabel() # 선택상태들을 전부 해제
+        thisSelect.setStyleSheet("background-color: #175A38;\nborder:none\n ")
+        thisTitle.setStyleSheet("background-color: transparent;\nborder: none;\ncolor: white\n\n")
+
+    def SelectedItem(self):
+        return self.thisSelectedItem
+
+    def size(self):
+        return len(self)

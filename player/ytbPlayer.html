@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <style>
+            *, html {
+                width: 100%;
+                height: 100%;
+            }
+            #ytplayer {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="ytplayer"></div>
+        <script>
+            var tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/player_api";
+            var firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+            let player = null;
+            function loadPlayer(ytbid) {
+                player = new YT.Player('ytplayer', {
+                    height: '360',
+                    width: '640',
+                    videoId: ytbid,
+                    events: {
+                        'onStateChange' : (event) => {
+                            console.log(event.data);
+                            return event.data;
+                        }
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>

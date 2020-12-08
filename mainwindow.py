@@ -1,6 +1,5 @@
 import sys
 import os
-import win32api
 import threading
 import time
 from copy import copy, deepcopy
@@ -33,7 +32,7 @@ class MyWindow(QMainWindow, main_form):
         self.shadow.setXOffset(5)
         self.shadow.setXOffset(7)
         self.shadow.setColor(QColor.fromRgb(0xDEDEDE))
-        self.PlayerState = 0 # 0 : 준비중, 1 : 플레이중, 2 : 일시정지, 3: 끝, 4 : 로딩중, -1 : 에러        
+        self.PlayerState = 0   
         # init ui
         self.setupUi(self)
 
@@ -283,13 +282,6 @@ class MyWindow(QMainWindow, main_form):
             self.showBlind(True, self)
             self.m_leftMenu.raise_()
 
-    def mainframe_mouseMove(self):
-        x, y = win32api.GetCursorPos()
-        if self.m_onplaylist.isVisible and x - self.windowHandle().position().x() < 31:
-            self.m_onplaylist.setVisible(True)
-        elif x - self.windowHandle().position().x() > 31:
-            self.m_onplaylist.setVisible(False)
-    
     def showMainFrame(self):
         self.m_mainframe.setVisible(True)
         self.m_blind.setGeometry(280, 0, 271, 900)

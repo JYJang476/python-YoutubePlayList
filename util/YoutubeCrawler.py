@@ -13,7 +13,7 @@ def youtube_crawler(URL):
 
     soup = BeautifulSoup(result.text, "html.parser")
     scripts = soup.find_all("script")
-    yt_initial_data = scripts[32]
+    yt_initial_data = scripts[34]
     yt_json_data = ""
 
     # get json

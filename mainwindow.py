@@ -194,7 +194,7 @@ class MyWindow(QMainWindow, main_form):
             QMessageBox.critical(self, "error", self.crawData,  QMessageBox.Yes)
 
     def clickAddDoneButton(self, e):
-        self.m_doneButton_final.setStyleSheet("background-color: #2F3C8F")
+        self.m_doneButton_final.setStyleSheet("background-color: #2F3C8F; color:white")
         newPlayList = []
         
         for data, listItem in zip(self.crawData, self.m_list_add):
@@ -209,6 +209,8 @@ class MyWindow(QMainWindow, main_form):
             # 리스트 박스 초기화
         self.m_ytbID.setText("")
         self.leftPlayList.clear()
+        self.m_list_add.clear()
+        self.__m_msgClose_click("add")        
         # 리스트 박스 갱신
         # 메인화면 이동
         for pl_id, pl_name, pl_date in PlayListController().index_playlist():

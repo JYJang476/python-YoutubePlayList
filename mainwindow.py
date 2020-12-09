@@ -160,6 +160,7 @@ class MyWindow(QMainWindow, main_form):
     # 해당 플레이리스트 음악목록 출력 (main)
     def printMusicList(self, argId):
         self.PlayList.clear()
+        
         playList = MusicListController().index_music_list(argId)
 
         for m_id, m_name, m_artist, m_yId, _, m_date in playList:       
@@ -171,7 +172,7 @@ class MyWindow(QMainWindow, main_form):
             self.PlayList[self.PlayList.size() - 1].setYtData(m_id, m_name, m_yId)
             self.PlayList.onDoubleClick = pl_DbClick
 
-        # 해당 플레이리스트 음악목록 출력 (main)
+    # 해당 플레이리스트 음악목록 출력 (main)
     def printMusicListEdit(self, argId):
         self.m_list_edit.clear()
         playList = MusicListController().index_music_list(argId)
@@ -190,7 +191,7 @@ class MyWindow(QMainWindow, main_form):
                 if not data["link"]:
                     listItem.titleMember.setChecked(False)
         elif str(type(self.crawData)) == "<class 'str'>":
-            QMessageBox(title="error", text=self.crawData).show()
+            QMessageBox.critical(self, "error", self.crawData,  QMessageBox.Yes)
 
     def clickAddDoneButton(self, e):
         self.m_doneButton_final.setStyleSheet("background-color: #2F3C8F")
@@ -317,7 +318,7 @@ class MyWindow(QMainWindow, main_form):
         # 이름 로드
         self.m_listTitle_edit.setText(ListItem.titleMember.text())
         # 이름 바꾸기 버튼 클릭 이벤트
-        self.m_schButton_edit.clicked.connect(lambda: print(self.m_ytbID_edit.text()))
+        self.m_schButton_edit.clicked.connect(lambda: print(self.m_ytbID_edit.text()) )
         # 확인 버튼 클릭 이벤트 m_musicAddButton
         self.m_musicAddButton.clicked.connect(lambda: self.showMsgBox("edit"))
         self.m_doneButton_final_edit.clicked.connect(lambda: self.clickMusicAddDone(ListItem.plId))

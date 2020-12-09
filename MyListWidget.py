@@ -154,6 +154,7 @@ class MyList(list):
             thisItem.editButton.deleteLater()
             thisItem.deleteButton.deleteLater()
         self.remove(thisItem)
+        self.listItems.remove(thisItem)
         thisItem = None
         
 

@@ -156,11 +156,11 @@ class MyList(list):
         self.remove(thisItem)
         self.listItems.remove(thisItem)
         thisItem = None
+        self.beforeItem = None
         
 
     def Refresh(self):
         copySelf = []
-        print(self.size())
         for i in range(self.size()):
             copySelf.append(self[i])
 

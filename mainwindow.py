@@ -45,6 +45,8 @@ class MyWindow(QMainWindow, main_form):
         self.m_list.setGraphicsEffect(self.shadow)
         self.m_msgBox.setVisible(False)
         self.m_msgBox_main.setVisible(False)
+        self.edit_musics = []
+        self.main_musics = []
 
         self.m_btback_add.clicked.connect(self.showMainFrame)
         self.m_btback_edit.clicked.connect(self.showMainFrame)
@@ -62,6 +64,7 @@ class MyWindow(QMainWindow, main_form):
         self.m_blind.setGeometry(280, 0, 271, 900)
 
         self.m_schButton.clicked.connect(self.clickCrawButton)
+        self.m_nameEdit.clicked.connect(self.showNameEditor)
         
         # Left Label Click 
         self.m_onplaylist.mousePressEvent = self.m_onplaylist_click   
@@ -78,8 +81,17 @@ class MyWindow(QMainWindow, main_form):
         
         # 선택 플레이리스트에 음악 추가
         def addMusic(listItem):
+            def validation(id, title, artist):
+                if (id == "" or title == "" or artist == ""):
+                    return False
+                return True
             def doneMsg():
-                print(listItem.text, "add")
+                if not validation(self.m_plName_main.text(), self.m_addtitle_main.text(), self.m_addartst_main.text()):
+                    QMessageBox.critical(self, "error", "빈 공간이 있는지 확인해주세요")
+                else:
+                    newMusic = {'link': True, 'title': self.m_addtitle_main.text(), 
+                    'musician': self.m_addartst_main.text(), 'url': self.m_plName_main.text()}
+                    MusicListController().add_music_list(listItem.plId, [newMusic])
                 self.__m_msgClose_click("main")
             self.showMsgBox("main")
             self.m_doneButton_main.clicked.connect(doneMsg)
@@ -101,12 +113,13 @@ class MyWindow(QMainWindow, main_form):
         self.m_doneButton_final.mouseReleaseEvent = self.clickAddDoneButton
         
         self.m_scrollbar.valueChanged.connect(lambda value: self.m_leftScroll.setGeometry(0, 0 - value, 461, 42 * self.leftPlayList.size()))
-        self.m_scrollbar.setPageStep(self.m_leftScrollbar.height())
-        self.m_scrollbar.setMaximum(130)
+        self.m_scrollbar.setPageStep(self.m_leftScroll.height() - self.m_leftScrollParent.height())
+        self.m_scrollbar.setMaximum(100)
 
         self.m_scrollbar.valueChanged.connect(lambda value: self.m_scroll.setGeometry(0, 0 - value, 461, 42 * self.PlayList.size()))
         self.m_scrollbar.setPageStep(self.m_scrollbar.height())
-        self.m_scrollbar.setMaximum(130)
+        self.m_scrollbar.setMaximum(self.m_scroll.height() - self.m_scrollParent.height())
+        
     
         # 플레이리스트 추가
         Controller().init_database()
@@ -121,6 +134,12 @@ class MyWindow(QMainWindow, main_form):
             self.checkThread.start()
 
         self.m_webengine.urlChanged.connect(urlchange)
+
+    def showNameEditor(self):
+        self.m_ytbID_edit.setVisible(True)
+        self.m_schButton_edit.setVisible(True)
+        self.m_ytbID_edit.setText(self.m_listTitle_edit.text())
+
 
     # 윈도우 종료시 스레드 처리
     def closeEvent(self, e):
@@ -168,9 +187,11 @@ class MyWindow(QMainWindow, main_form):
                 self.m_webengine.setUrl(QUrl("https://www.youtube.com/embed/" + listItem.getYtData()[2]))
                 self.nextVideo = listItem.Index + 1    
                 
-            self.PlayList.append(m_name)
-            self.PlayList[self.PlayList.size() - 1].setYtData(m_id, m_name, m_yId)
+            item = self.PlayList.append(m_name)
+            item.setYtData(m_id, m_name, m_yId)
+            self.m_webengine.setUrl(QUrl("https://www.youtube.com/embed/" + item.getYtData()[2]))
             self.PlayList.onDoubleClick = pl_DbClick
+
 
     # 해당 플레이리스트 음악목록 출력 (main)
     def printMusicListEdit(self, argId):
@@ -178,7 +199,8 @@ class MyWindow(QMainWindow, main_form):
         playList = MusicListController().index_music_list(argId)
 
         for m_id, m_name, m_artist, m_yId, _, m_date in playList:
-            self.m_list_edit.append(m_name)
+            item = self.m_list_edit.append(m_name)
+            item.plId = m_id
 
     # 크롤링 버튼 클릭 시 (add)
     def clickCrawButton(self):
@@ -194,7 +216,7 @@ class MyWindow(QMainWindow, main_form):
             QMessageBox.critical(self, "error", self.crawData,  QMessageBox.Yes)
 
     def clickAddDoneButton(self, e):
-        self.m_doneButton_final.setStyleSheet("background-color: #2F3C8F")
+        self.m_doneButton_final.setStyleSheet("background-color: #2F3C8F; color:white")
         newPlayList = []
         
         for data, listItem in zip(self.crawData, self.m_list_add):
@@ -209,6 +231,8 @@ class MyWindow(QMainWindow, main_form):
             # 리스트 박스 초기화
         self.m_ytbID.setText("")
         self.leftPlayList.clear()
+        self.m_list_add.clear()
+        self.__m_msgClose_click("add")        
         # 리스트 박스 갱신
         # 메인화면 이동
         for pl_id, pl_name, pl_date in PlayListController().index_playlist():
@@ -221,10 +245,18 @@ class MyWindow(QMainWindow, main_form):
     # 메세지 창을 띄우는 메서드
     def showMsgBox(self, parentName):
         if parentName == "edit":
+            def closeEditMsg():
+                self.showBlind(False)
+                self.m_msgBox_edit.setVisible(False)
+                self.m_plName_edit.setText("")
+                self.m_addtitle_edit.setText("")
+                self.m_addartist_edit.setText("")
+                self.edit_musics.clear()
+            self.m_msgClose_2.clicked.connect(closeEditMsg)
             self.showBlind(True, parent=self.m_editframe)
             self.m_blind.setGeometry(0, 0, 550, 900)
             self.m_blind.mousePressEvent = lambda e: self.__m_msgClose_click("edit") if e.buttons() & Qt.LeftButton else None
-            self.m_msgBox_edit.setGeometry(110, 310, 317, 174)
+            self.m_msgBox_edit.setGeometry(110, 310, 317, 261)
             self.m_msgBox_edit.setParent(self.m_editframe)
             self.m_msgBox_edit.setVisible(True)
             self.m_msgBox_edit.raise_()
@@ -233,7 +265,16 @@ class MyWindow(QMainWindow, main_form):
             self.showBlind(True, parent=self.m_mainframe)
             self.m_blind.setGeometry(0, 0, 550, 900)            
             self.m_blind.mousePressEvent = lambda e: self.__m_msgClose_click("main") if e.buttons() & Qt.LeftButton else None
-            self.m_msgBox_main.setGeometry(110, 310, 317, 174)
+            def closeMainMsg():
+                self.showBlind(False)
+                self.m_msgBox_main.setVisible(False)
+                self.m_plName_main.setText("")
+                self.m_addtitle_main.setText("")
+                self.m_addartst_main.setText("")
+            
+            self.m_msgClose_main.clicked.connect(closeMainMsg)
+
+            self.m_msgBox_main.setGeometry(110, 310, 317, 261)
             self.m_msgBox_main.setParent(self.m_mainframe)
             self.m_msgBox_main.setVisible(True)
             self.m_msgBox_main.raise_()
@@ -324,28 +365,61 @@ class MyWindow(QMainWindow, main_form):
         self.m_doneButton_final_edit.clicked.connect(lambda: self.clickMusicAddDone(ListItem.plId))
         self.m_doneButton_edit.clicked.connect(lambda: self.clickEditDoneButton(ListItem.plId))
         self.m_msgBox_edit.setVisible(False)
+        
+        def doneChangeName():
+            PlayListController().modify_playlist_name(ListItem.plId, self.m_ytbID_edit.text())
+            self.m_ytbID_edit.setVisible(False)
+            self.m_schButton_edit.setVisible(False)
+            self.m_listTitle_edit.setText(self.m_ytbID_edit.text())
+            ListItem.titleMember.setText(self.m_ytbID_edit.text())
+            self.m_ytbID_edit.setText("")
+            
+
+        self.m_schButton_edit.clicked.connect(doneChangeName)
 
         self.showEditFrame()
 
     def clickMusicAddDone(self, argPlId):
+        def validation(id, title, artist):
+            if (id == "" or title == "" or artist == ""):
+                return False
+            return True
+        if(not validation(self.m_plName_edit.text(), self.m_addtitle_edit.text(), self.m_addartist_edit.text())):
+            QMessageBox.critical(self, "error", "빈 공간이 있는지 확인해주세요")
+        else:
+            newMusic = {'link': True, 'title': self.m_addtitle_edit.text(), 
+            'musician': self.m_addartist_edit.text(), 'url': self.m_plName_edit.text()}
+            self.edit_musics.append(newMusic)
+            self.m_list_edit.append(self.m_addtitle_edit.text())
+
         self.showBlind(False)
         self.m_msgBox_edit.setVisible(False)
         self.m_plName_edit.setText("")
-        self.m_list_edit.append(self.m_plName_edit.text())
+        self.m_addtitle_edit.setText("")
+        self.m_addartist_edit.setText("")
+        self.edit_musics.clear()
+       
         self.m_blind.mousePressEvent = self.m_closepl_click
-        # 해당 링크의 음악 제목, 뮤지션의 정보 크롤링
-        # 음악 추가
-        # MusicListController().add_music_list(argPlId, [self.m_plName_edit.text()])
+
         
     def clickEditDoneButton(self, argPlId):
+        if(self.m_ytbID_edit.isVisible() or self.m_schButton_edit.isVisible()):
+            QMessageBox.critical(self, "error", "이름변경이 진행중입니다.")
+            return
+
         newPlayList = []
         musicList = MusicListController().index_music_list(argPlId)  
         for music, listItem in zip(musicList, self.m_list_edit):
             # 체크 상태가 아닌 음악 삭제
             if not listItem.titleMember.isChecked():
                 # 삭제할 음악 index 추가
-                newPlayList.append(music[0])
-        MusicListController().delete_music_list(newPlayList)
+                newPlayList.append(listItem.plId)
+        
+        if(len(newPlayList) > 0):
+            MusicListController().delete_music_list(newPlayList)
+
+        if(len(self.edit_musics) > 0):
+            MusicListController().add_music_list(argPlId, self.edit_musics)
         # 정리 후 메인 화면 이동
             # 텍스트박스 지우기(id, 이름)
             # 리스트 박스 초기화

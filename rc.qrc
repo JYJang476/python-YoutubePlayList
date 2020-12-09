@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="image">
+    <file>icons/name_edit.png</file>
     <file>icons/add_white.png</file>
     <file>icons/delete_red.png</file>
     <file>icons/delete_white.png</file>

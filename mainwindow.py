@@ -27,11 +27,6 @@ class MyWindow(QMainWindow, main_form):
         super().__init__()
         self.__initLayout()
         # init shadow object
-        self.shadow = QGraphicsDropShadowEffect()
-        self.shadow.setBlurRadius(6)
-        self.shadow.setXOffset(5)
-        self.shadow.setXOffset(7)
-        self.shadow.setColor(QColor.fromRgb(0xDEDEDE))
         self.PlayerState = 0   
         # init ui
         self.setupUi(self)
@@ -42,7 +37,6 @@ class MyWindow(QMainWindow, main_form):
         self.thisUrl = "https://www.youtube.com/embed/"
         self.nextVideo = None
         self.isClosed = False
-        self.m_list.setGraphicsEffect(self.shadow)
         self.m_msgBox.setVisible(False)
         self.m_msgBox_main.setVisible(False)
         self.edit_musics = []
@@ -74,6 +68,18 @@ class MyWindow(QMainWindow, main_form):
         self.m_list_edit = MyList(parent=self.m_editScroll, startTop=-42, argIsCheckBoxEnable=True)
         self.m_list_add = MyList(parent=self.m_addScroll, startTop=-42, argIsCheckBoxEnable=True)
         
+        self.m_webengine.page().runJavaScript('''
+            function initBlack() {
+                let player = document.getElementsByTagName("body")[0];
+                player.style = 'background-color: black';
+            }
+            initBlack();
+        ''')
+        self.m_blind.mousePressEvent = self.m_closepl_click
+        self.m_leftMenu.setVisible(True)
+        self.showBlind(True, self)
+        self.m_leftMenu.raise_()
+
         # add 페이지 리스트 세팅
         self.leftPlayList.setIsADDButton(True)
         self.leftPlayList.setIsEditButton(True)
@@ -108,7 +114,6 @@ class MyWindow(QMainWindow, main_form):
         self.m_doneButton_add.mousePressEvent = lambda e: self.m_doneButton_add.setStyleSheet("border: none; background-color: green; color: white") if e.buttons() & Qt.LeftButton else None
         self.m_doneButton_add.mouseReleaseEvent = self.m_doneButton_add_click
 
-        # self.m_doneButton_final.clicked.connect(self.clickAddDoneButton)  
         self.m_doneButton_final.mousePressEvent = lambda e: self.m_doneButton_final.setStyleSheet("border: none; background-color: green; color: white") if e.buttons() & Qt.LeftButton else None
         self.m_doneButton_final.mouseReleaseEvent = self.clickAddDoneButton
         
